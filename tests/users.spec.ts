@@ -1,28 +1,54 @@
 import { test, expect } from '@playwright/test';
 
-test('GET user details', async ({ request }) => {
+test('Get user by ID', async ({ request }) => {
 
-    const response = await request.get(
-        'https://jsonplaceholder.typicode.com/users/1'
-    );
+  const userId = 2;
 
-    // Status validation
-    expect(response.status()).toBe(200);
+  const response = await request.get(`/users/${userId}`);
 
-    // Header validation
-    expect(response.headers()['content-type']).toContain('application/json');
+  expect(response.status()).toBe(200);
 
-    // Response body
-    const body = await response.json();
+  const body = await response.json();
 
-    // Field validation
-    expect(body.id).toBe(1);
-    expect(body.name).toBe('Leanne Graham');
-    expect(body.username).toBe('Bret');
-    expect(body.email).toBe('Sincere@april.biz');
+  expect(body.id).toBe(userId);
+  expect(body.name).toBeTruthy();
+  expect(body.email).toBeTruthy();
+});
 
-    // Data type validation
-    expect(typeof body.id).toBe('number');
-    expect(typeof body.name).toBe('string');
-    expect(typeof body.email).toBe('string');
+
+test('Get user using query parameter', async ({ request }) => {
+
+  const response = await request.get('/users', {
+    params: {
+      username: 'Bret'
+    }
+  });
+
+  expect(response.status()).toBe(200);
+
+  const body = await response.json();
+
+  expect(body.length).toBeGreaterThan(0);
+  expect(body[0].username).toBe('Bret');
+});
+
+
+test('Create a new user', async ({ request }) => {
+
+  const response = await request.post('/users', {
+    data: {
+      name: 'Neeraja',
+      username: 'neeraja',
+      email: 'neeraja@example.com'
+    }
+  });
+
+  expect(response.status()).toBe(201);
+
+  const body = await response.json();
+
+  expect(body.name).toBe('Neeraja');
+  expect(body.username).toBe('neeraja');
+  expect(body.email).toBe('neeraja@example.com');
+  expect(body.id).toBeTruthy();
 });
